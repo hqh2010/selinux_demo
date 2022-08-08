@@ -1,0 +1,1 @@
+/usr/bin/c++  -g  -rdynamic CMakeFiles/selinux_demo_test.dir/client.cpp.o  -o selinux_demo_test -lstdc++ 

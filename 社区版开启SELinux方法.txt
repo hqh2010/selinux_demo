@@ -1,0 +1,205 @@
+蒋皓 7-28 15:24:26
+你创建一个这个文件：/etc/default/grub.d/01_deepin_selinux.cfg
+
+蒋皓 7-28 15:24:37
+然后里面的内容为：GRUB_CMDLINE_LINUX_DEFAULT="$GRUB_CMDLINE_LINUX_DEFAULT security=selinux checkreqprot=1"
+
+更新grub
+sudo update-grub
+
+安装SELinux包
+selinux-policy-default
+
+工具包（可选不是必须的）
+selinux-utils setools
+
+查看内核是否开启SELinux
+cat /proc/cmdline
+BOOT_IMAGE=/vmlinuz-5.15.45-amd64-desktop root=UUID=1a09372a-5ec8-462b-b0fd-d15aeab283ee ro splash quiet security=selinux checkreqprot=1 DEEPIN_GFXMODE=
+
+
+
+手动修改为 enforcing 模式前需要
+添加仓库
+deb  [trusted=yes] https://aptly.uniontech.com/pkg/eagle-1052/release-candidate/W-ezu-e7n-WuieWFqF3kuJPkuJrniYjmnKwxMDUyX3NlbGludXjmnYPpmZDnrqHmjqfmtYvor5UyMDIyLTA3LTE1IDExOjI3OjIw/  unstable main
+升级
+libselinux1
+sudo fixfiles -F onboot
+重启电脑后，查看打标签成功没有：
+ls -lZ /var/lib/deepin
+再使用
+sudo setenforce 1 改为Enforcing 模式
+
+
+蒋皓 8-2 09:30:00
+seinfo -a(看属性)
+
+蒋皓 8-2 09:30:08
+seinfo -t（看类型）
+
+蒋皓 8-2 09:31:03
+-x (看扩展信息，对于-a来说，就是看属性的成员,比如 seinfo -a domain -x；   对于-t来说，就是看这个类型加入了哪些属性，比如seinfo -t sysadm_t -x)
+
+蒋皓 8-2 09:31:57
+sesearch --allow ：查看所有allow规则；
+sesearch -s sysadm_t -t etc_t --allow :查看主体sysadm_t对客体etc_t的所有allow策略
+
+Allow subj_t obj_t : obj_class pemissions;
+其中subj_t为访问的主题的domain，obj_t为被访问对象的domain，obj_class为被访问对象的所属的类型，permissions为当前规则所许可的访问方式的集合，比如，
+Allow user_t bin_t : file {read write open};
+其含义为允许处于user_t这个domain中的进程对file对象中标签为bin_t的对象的打开，读写的权利。
+
+
+AV规则中可使用多类型与多属性，属性和类型支持混合组成源类型与目标类型，使用{}+空格来表示。
+
+allow {usr_t domain} {adbd_type file_t} : file execute;
+// 源类型 usr_t domain 目标类型 adbd_type file_t
+
+
+属性的语法与格式
+    属性与类型共享同一个命名空间，所以二者不可以同名，为了区分，属性以xxx_type形式被声明。
+//属性声明
+attribute attr_type;
+attribute file_type;
+
+// 赋予backup_t类型的进程 访问 具有file_type属性的类型的文件 读权限
+allow backup_t file_type :file read;
+
+/home目录下新建一个文件test，使用ls -Z 查询
+user_u:object_r:home_root_t:s0 test
+
+uos@uos:~/Desktop/proxytest/build$ getenforce
+Permissive
+
+新建一个qt工程访问这个文件，默认是可以访问的，在Permissive模式下，/var/log/audit没有日志
+user_u:object_r:user_home_t:s0 selinux_demo_test
+
+semanage命令 是用来查询与修改SELinux默认目录的安全上下文。SELinux的策略与规则管理相关命令：seinfo命令、sesearch命令、getsebool命令、setsebool命令、semanage命令。
+
+uos@uos:/home$ sudo semanage fcontext -l | grep "/home"
+/home                                              directory          system_u:object_r:home_root_t:s0 
+/home                                              symbolic link      system_u:object_r:home_root_t:s0 
+/home/[^/]+                                        directory          user_u:object_r:user_home_dir_t:s0 
+/home/[^/]+/((www)|(web)|(public_html))(/.*)?/\.htaccess regular file       user_u:object_r:httpd_user_htaccess_t:s0 
+/home/[^/]+/((www)|(web)|(public_html))(/.*)?/logs(/.*)? all files          user_u:object_r:httpd_user_ra_content_t:s0 
+/home/[^/]+/((www)|(web)|(public_html))(/.+)?      all files          user_u:object_r:httpd_user_content_t:s0 
+/home/[^/]+/((www)|(web)|(public_html))/cgi-bin(/.+)? all files          user_u:object_r:httpd_user_script_exec_t:s0 
+/home/[^/]+/.+                                     all files          user_u:object_r:user_home_t:s0 
+/home/[^/]+/Documents(/.*)?                        all files          user_u:object_r:xdg_documents_t:s0 
+
+
+semodule是用于管理SELinux策略模块的工具，包括安装，升级，列出和删除模块。 semodule还可用于强制从模块存储重建策略和/或强制重新加载策略而不执行任何其他事务。 semodule作用于semodule_package创建的模块包。通常，这些文件具有.pp后缀（策略包），尽管这不是以任何方式强制执行的。
+安装策略模块
+sudo semodule -i selinux_demo_test.pp.bz2
+卸载策略模块
+sudo semodule -r selinux_demo_test.pp.bz2
+
+uos@uos:~/Desktop/proxytest/build$ getenforce
+Permissive
+
+新建一个qt工程访问这个文件，默认是可以访问的，在Permissive模式下，/var/log/audit没有日志
+user_u:object_r:user_home_t:s0 selinux_demo_test
+改为：
+xdg_downloads_t
+chcon -t xdg_downloads_t selinux_demo_test
+
+uos@uos:~/Desktop/proxytest/build$ ls -Z
+user_u:object_r:user_home_t:s0 main.o              user_u:object_r:user_home_t:s0 moc_mainwindow.o
+user_u:object_r:user_home_t:s0 mainwindow.o        user_u:object_r:user_home_t:s0 moc_predefs.h
+user_u:object_r:user_home_t:s0 Makefile            user_u:object_r:user_home_t:s0 selinux_demo_test
+user_u:object_r:user_home_t:s0 moc_mainwindow.cpp  user_u:object_r:user_home_t:s0 ui_mainwindow.h
+uos@uos:~/Desktop/proxytest/build$ sudo chcon -t xdg_downloads_t selinux_demo_test
+uos@uos:~/Desktop/proxytest/build$ ls -Z
+    user_u:object_r:user_home_t:s0 main.o                  user_u:object_r:user_home_t:s0 moc_mainwindow.o
+    user_u:object_r:user_home_t:s0 mainwindow.o            user_u:object_r:user_home_t:s0 moc_predefs.h
+    user_u:object_r:user_home_t:s0 Makefile            user_u:object_r:xdg_downloads_t:s0 selinux_demo_test
+    user_u:object_r:user_home_t:s0 moc_mainwindow.cpp      user_u:object_r:user_home_t:s0 ui_mainwindow.h
+uos@uos:~/Desktop/proxytest/build$ 
+
+
+# 开启日志服务
+apt policy auditd
+systemctl enable auditd.service
+systemctl start auditd.service
+
+
+# /var/log/audit
+type=AVC msg=audit(1659488504.975:981): avc:  denied  { read } for  pid=24475 comm="selinux_demo_te" name="test" dev="vda7" ino=1444272 scontext=user_u:user_r:user_t:s0 tcontext=user_u:object_r:home_root_t:s0 tclass=file permissive=1
+
+uos@uos:/$ ps -ef | grep selinux
+uos      24475  7355  0 08:56 pts/1    00:00:00 ./selinux_demo_test
+uos      25308 16903  0 09:03 pts/0    00:00:00 grep selinux
+
+清日志
+echo -n "" | tee /var/log/audit/audit.log
+
+永久修改模式
+uos@uos:/home$ cat /etc/selinux/config
+# This file controls the state of SELinux on the system.
+# SELINUX= can take one of these three values:
+# enforcing - SELinux security policy is enforced.
+# permissive - SELinux prints warnings instead of enforcing.
+# disabled - No SELinux policy is loaded.
+SELINUX=permissive
+# SELINUXTYPE= can take one of these two values:
+# default - equivalent to the old strict and targeted policies
+# mls     - Multi-Level Security (for military and educational use)
+# src     - Custom policy built from source
+SELINUXTYPE=default
+
+# SETLOCALDEFS= Check local definition changes
+SETLOCALDEFS=0
+
+重新打标签
+sudo fixfiles -F onboot
+
+参考文档
+
+https://wikidev.uniontech.com/%E5%AE%89%E5%85%A8%E6%80%A7-SELinux%E4%BB%8B%E7%BB%8D%E5%8F%8A%E6%B5%8B%E8%AF%95
+https://m-zhoujie2.gitbooks.io/-linux-devops-2/content/chapter3-10.html
+https://wangchujiang.com/linux-command/c/seinfo.html
+https://wangchujiang.com/linux-command/c/semanage.html
+SELinux规则
+https://www.codeleading.com/article/31536034171/
+https://www.debian.org/doc/manuals/debian-handbook/sect.selinux.en.html
+
+问题集：
+1.json配置文件格式？
+2.如何控制摄像头，给摄像头设备节点打标签，再给需要访问的应用二进制打标？
+3.SELinux策略加载慢，预加载应用配置策略？？？预分配多少个应用？
+4.为什么卸载应用时要移除策略？是必须的吗？
+cfg_file: 此文件的安装配置文件，此文件为json格式，列出了此应用程序的安装信息，比如应用初始声明的敏感级权限、应用所有可执行文件的路径、应用的哪些文件需要被保护等。
+5.config.json的应用程序执行文件是不是必须的？　如果存在间接调用是不是都要配置？（比如一个应用有多个二进制）
+6.找到所有camera设备的类型，谁负责找？
+7.黑名单机制实现的关键逻辑代码段未指出来
+8.seinfo --all　查询出来的权限信息有好多种？但是你给的系统支持的规则好像没有多少？
+9.既然当前方案是假的黑名单方案，为什么不直接使用原有的sid而是要扩展sid2 ? sid2的属性值是否支持使用系统工具查询？？？　比如：ls -Z?　getfattr （扩展属性主要是兼容等保3, 扩展属性sid2摒弃了原有的sid支持域切换的复杂操作，对于进程防杀等特性 实现起来更容易）
+10.sid和sid2 支持同时配置吗？若支持哪个的优先级高？（不存在优先级，范围大的起作用）
+
+
+
+uos@uos:~/Desktop/selinux_demo_test/build$ getenforce
+Permissive
+uos@uos:~/Desktop/selinux_demo_test/build$ ls -Z /home/uos/test 
+user_u:object_r:user_home_t:s0 /home/uos/test
+uos@uos:~/Desktop/selinux_demo_test/build$ ls -Z
+user_u:object_r:user_home_t:s0 CMakeCache.txt       user_u:object_r:user_home_t:s0 Makefile
+user_u:object_r:user_home_t:s0 CMakeFiles           user_u:object_r:user_home_t:s0 selinux_demo_test
+user_u:object_r:user_home_t:s0 cmake_install.cmake
+uos@uos:~/Desktop/selinux_demo_test/build$ ./selinux_demo_test
+开始读取/home/uos/test文件
+读取结果为: hello, this is a selinux demo test.
+uos@uos:~/Desktop/selinux_demo_test/build$ sudo chcon -t myapp_exec_t selinux_demo_test
+uos@uos:~/Desktop/selinux_demo_test/build$ ls -Z
+ user_u:object_r:user_home_t:s0 CMakeCache.txt        user_u:object_r:user_home_t:s0 Makefile
+ user_u:object_r:user_home_t:s0 CMakeFiles           user_u:object_r:myapp_exec_t:s0 selinux_demo_test
+ user_u:object_r:user_home_t:s0 cmake_install.cmake
+uos@uos:~/Desktop/selinux_demo_test/build$ ./selinux_demo_test 
+开始读取/home/uos/test文件
+读取结果为: hello, this is a selinux demo test.
+uos@uos:~/Desktop/selinux_demo_test/build$ sudo setenforce 1
+uos@uos:~/Desktop/selinux_demo_test/build$ getenforce
+Enforcing
+uos@uos:~/Desktop/selinux_demo_test/build$ ./selinux_demo_test 
+开始读取/home/uos/test文件
+读取错误: Permission denied
