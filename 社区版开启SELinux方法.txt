@@ -94,6 +94,17 @@ sudo semodule -i selinux_demo_test.pp.bz2
 卸载策略模块
 sudo semodule -r selinux_demo_test.pp.bz2
 
+登陆安全管理员，只能在Permissive模式下登陆
+ssh secadm@127.0.0.1
+sudo -s
+查询帐号：
+semanage login -l
+getsebool allow_deepin_app_1_controlled_home_file
+以安全管理员身份设置
+setsebool allow_deepin_app_1_controlled_home_file=1
+
+sudo chcon -t deepin_app_1_exec_t selinux_demo_test
+
 uos@uos:~/Desktop/proxytest/build$ getenforce
 Permissive
 
