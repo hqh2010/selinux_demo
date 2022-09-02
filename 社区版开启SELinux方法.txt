@@ -94,6 +94,11 @@ sudo semodule -i selinux_demo_test.pp.bz2
 卸载策略模块
 sudo semodule -r selinux_demo_test.pp.bz2
 
+要列出可用的 SELinux 用户，在Permissive模式下查询 
+seinfo -u
+semanage login -l 命令来查看这个 Linux 用户映射
+sudo semanage login -l 
+
 登陆安全管理员，只能在Permissive模式下登陆
 ssh secadm@127.0.0.1
 sudo -s
