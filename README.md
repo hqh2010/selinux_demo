@@ -64,12 +64,14 @@ make clean
 
 # 参考文档
 
-[https://wikidev.uniontech.com/%E5%AE%89%E5%85%A8%E6%80%A7-SELinux%E4%BB%8B%E7%BB%8D%E5%8F%8A%E6%B5%8B%E8%AF%95
-]()[https://m-zhoujie2.gitbooks.io/-linux-devops-2/content/chapter3-10.html]()
-[https://wangchujiang.com/linux-command/c/seinfo.html]()
-[https://wangchujiang.com/linux-command/c/semanage.html]()
+* [安全性-SELinux介绍及测试](https://wikidev.uniontech.com/%E5%AE%89%E5%85%A8%E6%80%A7-SELinux%E4%BB%8B%E7%BB%8D%E5%8F%8A%E6%B5%8B%E8%AF%95)
 
-SELinux规则
+* [SELinux 策略与规则管理](https://m-zhoujie2.gitbooks.io/-linux-devops-2/content/chapter3-10.html)
 
-[https://www.codeleading.com/article/31536034171/]()
-[https://www.debian.org/doc/manuals/debian-handbook/sect.selinux.en.html]()
+* [seinfo命令说明](https://wangchujiang.com/linux-command/c/seinfo.html)
+
+* [semanage命令说明](https://wangchujiang.com/linux-command/c/semanage.html)
+
+* [SELinux规则](https://www.codeleading.com/article/31536034171/)
+
+* [Debain selinux说明](https://www.debian.org/doc/manuals/debian-handbook/sect.selinux.en.html)
