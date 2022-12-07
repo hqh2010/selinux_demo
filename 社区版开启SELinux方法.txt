@@ -219,3 +219,13 @@ Enforcing
 uos@uos:~/Desktop/selinux_demo_test/build$ ./selinux_demo_test 
 开始读取/home/uos/test文件
 读取错误: Permission denied
+
+没有安全管理员账户需要创建安全管理员账户：
+sudo -s
+useradd -s /bin/bash -m secadm
+usermod -aG sudo secadm
+passwd secadm
+添加用户为安全管理员：
+semanage login -a -s secadm_u secadm
+
+
