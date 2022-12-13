@@ -24,6 +24,7 @@ BOOT_IMAGE=/vmlinuz-5.15.45-amd64-desktop root=UUID=1a09372a-5ec8-462b-b0fd-d15a
 deb  [trusted=yes] https://aptly.uniontech.com/pkg/eagle-1052/release-candidate/W-ezu-e7n-WuieWFqF3kuJPkuJrniYjmnKwxMDUyX3NlbGludXjmnYPpmZDnrqHmjqfmtYvor5UyMDIyLTA3LTE1IDExOjI3OjIw/  unstable main
 升级
 libselinux1
+＃设置下次重启系统后打标签
 sudo fixfiles -F onboot
 重启电脑后，查看打标签成功没有：
 ls -lZ /var/lib/deepin
@@ -176,6 +177,8 @@ usermod -aG sudo secadm
 passwd secadm
 添加用户为安全管理员：
 semanage login -a -s secadm_u secadm
+登陆安全管理员，只能在Permissive模式下登陆
+ssh secadm@127.0.0.1
 
 相关概念及定义
 类型：类型是selinux中对资源的一种标记，selinux的权限授予都是基于标记的， 标记可以被当作扩展属性写入主体可执行文件或客体文件。所以类型既可以是主体也可以客体，为了区分，将主体类型称为域(domain)，客体类型称为类型(type)。
