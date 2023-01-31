@@ -180,6 +180,14 @@ semanage login -a -s secadm_u secadm
 登陆安全管理员，只能在Permissive模式下登陆
 ssh secadm@127.0.0.1
 
+查看SELinux用户映射
+sudo semanage login -l
+删除SELinux用户映射
+sudo semanage login -d permission-manager
+
+查询文件扩展属性
+getfattr -m . -d test
+
 相关概念及定义
 类型：类型是selinux中对资源的一种标记，selinux的权限授予都是基于标记的， 标记可以被当作扩展属性写入主体可执行文件或客体文件。所以类型既可以是主体也可以客体，为了区分，将主体类型称为域(domain)，客体类型称为类型(type)。
 
