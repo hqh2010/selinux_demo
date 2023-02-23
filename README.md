@@ -75,3 +75,10 @@ make clean
 * [SELinux规则](https://www.codeleading.com/article/31536034171/)
 
 * [Debain selinux说明](https://www.debian.org/doc/manuals/debian-handbook/sect.selinux.en.html)
+
+http://oss.tresys.com/docs/refpolicy/api/kernel_domain.html
+
+https://blog.csdn.net/cheng_fangang/article/details/38677105
+
+https://selinuxproject.org/page/RefpolicyWriteModule
+
