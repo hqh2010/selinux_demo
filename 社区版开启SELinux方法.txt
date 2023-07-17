@@ -93,7 +93,7 @@ semodule是用于管理SELinux策略模块的工具，包括安装，升级，�
 安装策略模块
 sudo semodule -i selinux_demo_test.pp.bz2
 卸载策略模块
-sudo semodule -r selinux_demo_test.pp.bz2
+sudo semodule -r selinux_demo_test
 
 要列出可用的 SELinux 用户，在Permissive模式下查询 
 seinfo -u
